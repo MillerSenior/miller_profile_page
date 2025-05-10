@@ -1,0 +1,6 @@
+// INSTRUCTIONS FOR MANUAL EDIT  
+// 1. Open scripts.js in your editor  
+// 2. Find the openResumeModal function (around line 418)  
+// 3. Replace the entire function with the code below  
+// 4. Save the file  
+  
