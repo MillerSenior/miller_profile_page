@@ -688,23 +688,23 @@ body.light-mode #topnav {
 
 /* Mobile modal close button - ensure always visible */
 .mobile-modal-close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+  position: fixed;
+  top: 15px;
+  right: 15px;
   background: var(--accent);
   color: black;
   border: none;
-  width: 35px;
-  height: 35px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
   cursor: pointer;
-  z-index: 1250;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
 }
 
 @media (max-width: 768px) {
@@ -716,6 +716,7 @@ body.light-mode #topnav {
     top: auto;
     left: auto;
     transform: none;
+    padding-top: 40px; /* Ensure space for the fixed close button */
   }
 }
 
@@ -753,18 +754,6 @@ body.light-mode #topnav {
     color: var(--accent) !important;
     transform: none;
     box-shadow: none;
-  }
-
-  /* Mobile modal enhancements */
-  .mobile-modal-content {
-    padding-top: 40px; /* Space for close button */
-  }
-  
-  /* Ensure the mobile modal close button is highly visible */
-  .mobile-modal-close {
-    position: fixed;
-    top: 15px;
-    right: 15px;
   }
 }
 
