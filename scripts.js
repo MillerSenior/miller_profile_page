@@ -1237,23 +1237,41 @@ function renderContent(tab, container) {
     });
     contentInner.appendChild(contactList);
   } else if (tab === 'resume') {
-    // Create view button
-    const viewBtn = document.createElement('button');
-    viewBtn.className = 'resume-btn outline';
-    viewBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg> View in New Tab';
-    viewBtn.onclick = function() {
-      window.open(resumeFile, '_blank');
-    };
+    // Create open PDF button
+    const openPdfBtn = document.createElement('a');
+    openPdfBtn.className = 'resume-btn';
+    openPdfBtn.href = resumeFile;
+    openPdfBtn.target = '_blank';
+    openPdfBtn.rel = 'noopener noreferrer';
+    openPdfBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg> Open PDF';
+    openPdfBtn.style.display = 'inline-block';
+    openPdfBtn.style.textDecoration = 'none';
+    openPdfBtn.style.cursor = 'pointer';
     
-    // Use the universal PDF viewer with correct resumeFile path
-    const pdfViewer = createPDFViewer(resumeFile, 'Anthony Miller - Resume', {
-      buttons: [viewBtn],
-      loadingText: 'resume'
-    });
+    // Create a simple message instead of trying to embed the PDF
+    const resumeContainer = document.createElement('div');
+    resumeContainer.className = 'card';
+    resumeContainer.style.textAlign = 'center';
+    resumeContainer.style.padding = '40px 20px';
     
-    contentInner.appendChild(pdfViewer);
+    const resumeHeading = document.createElement('h3');
+    resumeHeading.textContent = 'Anthony Miller - Resume';
+    resumeHeading.style.marginBottom = '20px';
     
-    console.log('PDF path being loaded:', resumeFile);
+    const resumeMessage = document.createElement('p');
+    resumeMessage.textContent = 'Click the button below to view the resume in a new tab.';
+    resumeMessage.style.marginBottom = '30px';
+    
+    const buttonContainer = document.createElement('div');
+    buttonContainer.appendChild(openPdfBtn);
+    
+    resumeContainer.appendChild(resumeHeading);
+    resumeContainer.appendChild(resumeMessage);
+    resumeContainer.appendChild(buttonContainer);
+    
+    contentInner.appendChild(resumeContainer);
+    
+    console.log('Resume view simplified to direct PDF open button');
   }
 }
 
@@ -1312,3 +1330,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 }); 
+
