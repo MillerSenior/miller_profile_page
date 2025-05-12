@@ -468,8 +468,15 @@ function openMobileModal(content) {
   const mobileModal = document.getElementById('mobileContentModal');
   const mobileContent = document.getElementById('mobileModalContent');
   
-  // Clone content to modal
-  mobileContent.innerHTML = content;
+  // Clear previous content
+  mobileContent.innerHTML = '';
+  
+  // Add the content - either as HTML string or DOM element
+  if (typeof content === 'string') {
+    mobileContent.innerHTML = content;
+  } else {
+    mobileContent.appendChild(content);
+  }
   
   // Make sure we have a visible close button
   // Check if a close button already exists, if not add one
@@ -515,7 +522,7 @@ function openMobileModal(content) {
         
         // Open a new modal with the PDF viewer
         setTimeout(() => {
-          openMobileModal(pdfViewerContent.outerHTML);
+          openMobileModal(pdfViewerContent);
         }, 300);
       });
     }
@@ -553,7 +560,7 @@ function openMobileModal(content) {
         
         // Open a new modal with the PDF viewer
         setTimeout(() => {
-          openMobileModal(pdfViewerContent.outerHTML);
+          openMobileModal(pdfViewerContent);
         }, 300);
       });
     });
