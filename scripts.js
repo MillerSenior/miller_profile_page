@@ -384,9 +384,200 @@ function downloadResume() {
   }, 3000);
 }
 
+// Function to download business card as vCard
+function downloadBusinessCard() {
+  // Create vCard content with the contact information
+  const vCardData = [
+    'BEGIN:VCARD',
+    'VERSION:3.0',
+    'FN:Anthony Miller Sr',
+    'TITLE:Software Engineer',
+    'EMAIL:anthony@unlockedlabs.org',
+    'URL:https://github.com/MillerSenior/',
+    'URL:https://www.linkedin.com/in/anthony-miller-sr-a38bb02b9/',
+    'ADR:;;St. Louis, MO;;;;',
+    'TEL:(314) 885-8610',
+    'END:VCARD'
+  ].join('\n');
+
+  // Create a Blob with the vCard data
+  const blob = new Blob([vCardData], { type: 'text/vcard' });
+  const url = URL.createObjectURL(blob);
+
+  // Create a download link and click it
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'Anthony_Miller_Contact.vcf';
+  
+  // Show feedback message
+  const feedbackElement = document.createElement('div');
+  feedbackElement.innerHTML = `<div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+    background: rgba(0, 242, 254, 0.9); color: black; padding: 15px 20px; 
+    border-radius: 10px; z-index: 9999; box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+    font-weight: bold; font-size: 16px; text-align: center; width: 80%;">
+    Downloading business card...<br>
+    <span style="font-size: 14px; opacity: 0.8;">Add to your contacts with one click</span></div>`;
+  document.body.appendChild(feedbackElement);
+  
+  // Append to body, click, and remove
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  // Revoke the URL to free up memory
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+    document.body.removeChild(feedbackElement);
+  }, 3000);
+}
+
+// Function to download visual HTML business card
+function downloadVisualCard() {
+  // Create HTML business card content
+  const htmlTemplate = `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anthony Miller Sr - Business Card</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+      }
+      body {
+        background-color: #f5f5f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+      .card {
+        width: 90mm;
+        height: 50mm;
+        background: linear-gradient(135deg, #121212 0%, #2a2a2a 100%);
+        color: white;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+        padding: 20px;
+      }
+      .name {
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: white;
+      }
+      .title {
+        font-size: 14px;
+        color: rgba(0, 242, 254, 1);
+        margin-bottom: 15px;
+        letter-spacing: 1px;
+      }
+      .contact-info {
+        font-size: 12px;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+      }
+      .contact-label {
+        color: rgba(0, 242, 254, 0.8);
+        margin-right: 8px;
+        min-width: 20px;
+        text-align: center;
+      }
+      .accent-line {
+        position: absolute;
+        width: 100%;
+        height: 6px;
+        background-color: rgba(0, 242, 254, 0.8);
+        top: 0;
+        left: 0;
+      }
+      .accent-dot {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: rgba(0, 242, 254, 0.15);
+        bottom: -20px;
+        right: -20px;
+      }
+      @media print {
+        body {
+          background: none;
+        }
+        .card {
+          box-shadow: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="accent-line"></div>
+      <div class="accent-dot"></div>
+      
+      <div class="name">Anthony Miller Sr</div>
+      <div class="title">SOFTWARE ENGINEER</div>
+      
+      <div class="contact-info">
+        <span class="contact-label">📧</span> anthony@unlockedlabs.org
+      </div>
+      <div class="contact-info">
+        <span class="contact-label">📱</span> (314) 885-8610
+      </div>
+      <div class="contact-info">
+        <span class="contact-label">🌐</span> github.com/MillerSenior
+      </div>
+      <div class="contact-info">
+        <span class="contact-label">📍</span> St. Louis, MO
+      </div>
+    </div>
+  </body>
+  </html>
+  `;
+
+  // Create a Blob with the HTML content
+  const blob = new Blob([htmlTemplate], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+
+  // Create a download link and click it
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'Anthony_Miller_BusinessCard.html';
+  
+  // Show feedback message
+  const feedbackElement = document.createElement('div');
+  feedbackElement.innerHTML = `<div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+    background: rgba(0, 242, 254, 0.9); color: black; padding: 15px 20px; 
+    border-radius: 10px; z-index: 9999; box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+    font-weight: bold; font-size: 16px; text-align: center; width: 80%;">
+    Downloading visual business card...<br>
+    <span style="font-size: 14px; opacity: 0.8;">Open in any browser and print for a physical card</span></div>`;
+  document.body.appendChild(feedbackElement);
+  
+  // Append to body, click, and remove
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  // Revoke the URL to free up memory
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+    document.body.removeChild(feedbackElement);
+  }, 3000);
+}
+
 // Make these functions available globally
 window.openResumeModal = openResumeModal;
 window.downloadResume = downloadResume;
+window.downloadBusinessCard = downloadBusinessCard;
+window.downloadVisualCard = downloadVisualCard;
 window.showTab = showTab;
 window.toggleTheme = toggleTheme;
 
@@ -1208,6 +1399,47 @@ function renderContent(tab, container) {
   } else if (tab === 'contact') {
     const contactList = document.createElement('div');
     contactList.className = 'card';
+    
+    // Create a header with download business card button
+    const headerDiv = document.createElement('div');
+    headerDiv.style.display = 'flex';
+    headerDiv.style.justifyContent = 'space-between';
+    headerDiv.style.alignItems = 'center';
+    headerDiv.style.marginBottom = '25px';
+    headerDiv.style.padding = '10px 0';
+    headerDiv.style.borderBottom = '1px solid var(--accent)';
+    
+    const headerTitle = document.createElement('h2');
+    headerTitle.style.margin = '0';
+    headerTitle.textContent = 'Contact Information';
+    
+    // Create buttons container
+    const btnContainer = document.createElement('div');
+    btnContainer.style.display = 'flex';
+    btnContainer.style.gap = '10px';
+    
+    // Contact/vCard button
+    const contactBtn = document.createElement('button');
+    contactBtn.className = 'resume-btn';
+    contactBtn.innerHTML = '📇 Save Contact';
+    contactBtn.style.fontSize = '14px';
+    contactBtn.style.padding = '8px 15px';
+    contactBtn.onclick = downloadBusinessCard;
+    
+    // Visual card button
+    const visualCardBtn = document.createElement('button');
+    visualCardBtn.className = 'resume-btn outline';
+    visualCardBtn.innerHTML = '🪪 Business Card';
+    visualCardBtn.style.fontSize = '14px';
+    visualCardBtn.style.padding = '8px 15px';
+    visualCardBtn.onclick = downloadVisualCard;
+    
+    btnContainer.appendChild(contactBtn);
+    btnContainer.appendChild(visualCardBtn);
+    
+    headerDiv.appendChild(headerTitle);
+    headerDiv.appendChild(btnContainer);
+    contactList.appendChild(headerDiv);
     
     data[tab].forEach(item => {
       const contactItem = document.createElement('div');
