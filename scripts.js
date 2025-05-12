@@ -814,8 +814,17 @@ window.closeMobileModal = closeMobileModal;
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-  // Initialize first tab
-  showTab('experience');
+  // Check if we're on mobile
+  const isMobile = window.innerWidth <= 768;
+  
+  // Initialize first tab only on desktop
+  if (!isMobile) {
+    showTab('experience');
+  } else {
+    // On mobile, just update the active nav link without opening the dropdown
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    document.querySelector('.nav-link[onclick="showTab(\'experience\')"]').classList.add('active');
+  }
   
   // Start typing effect
   typeNext();
