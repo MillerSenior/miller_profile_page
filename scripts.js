@@ -329,7 +329,7 @@ function renderTab(tab) {
 content.style.transition = 'opacity 0.2s ease';
 
 function openResumeModal() {
-  console.log('Opening resume in new tab:', resumeFile);
+  console.log('Opening resume in app viewer:', resumeFile);
   
   // Close any existing mobile modal first
   const mobileModal = document.getElementById('mobileContentModal');
@@ -337,23 +337,16 @@ function openResumeModal() {
     closeMobileModal();
   }
   
-  // Show feedback message
-  const feedbackElement = document.createElement('div');
-  feedbackElement.innerHTML = `<div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-    background: rgba(0, 242, 254, 0.9); color: black; padding: 15px 20px; 
-    border-radius: 10px; z-index: 9999; box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
-    font-weight: bold; font-size: 16px; text-align: center; width: 80%;">
-    Opening resume...<br>
-    <span style="font-size: 14px; opacity: 0.8;">The resume will open in a new tab</span></div>`;
-  document.body.appendChild(feedbackElement);
-  
-  // Simply open the PDF in a new tab - this works on all devices
-  window.open(resumeFile, '_blank');
-  
-  // Remove feedback after a short delay
-  setTimeout(() => {
-    document.body.removeChild(feedbackElement);
-  }, 2000);
+  // For mobile, we'll handle this differently - show the resume tab
+  if (window.innerWidth <= 768) {
+    showTab('resume');
+  } else {
+    // On desktop, load the PDF in the main content area
+    const content = document.getElementById('content');
+    if (content) {
+      renderTab('resume');
+    }
+  }
 }
 
 function downloadResume() {
@@ -379,7 +372,6 @@ function downloadResume() {
   const link = document.createElement('a');
   link.href = resumeFile;
   link.download = 'Anthony_Miller_Resume.pdf'; // Specify filename
-  link.target = '_blank';
   
   // Append to body, click, and remove
   document.body.appendChild(link);
@@ -513,11 +505,18 @@ function openMobileModal(content) {
         e.preventDefault();
         e.stopPropagation();
         
-        // Close mobile modal
+        // First close this mobile modal
         closeMobileModal();
         
-        // Open resume in new tab
-        openResumeModal();
+        // Create new mobile modal content for PDF viewing
+        const pdfViewerContent = createMobilePDFViewer(data.resume, 'Anthony Miller - Resume', {
+          showBackToResume: true
+        });
+        
+        // Open a new modal with the PDF viewer
+        setTimeout(() => {
+          openMobileModal(pdfViewerContent.outerHTML);
+        }, 300);
       });
     }
     
@@ -534,6 +533,31 @@ function openMobileModal(content) {
       });
     }
   }
+  // Check if this contains certificate links and attach event listeners
+  else if (mobileContent.querySelectorAll('.cert-link').length > 0) {
+    const certLinks = mobileContent.querySelectorAll('.cert-link');
+    
+    certLinks.forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const pdfPath = this.getAttribute('data-pdf');
+        const title = this.textContent.trim();
+        
+        // First close this mobile modal
+        closeMobileModal();
+        
+        // Create new mobile modal content for PDF viewing
+        const pdfViewerContent = createMobilePDFViewer(pdfPath, title, {
+          showBackToCerts: true
+        });
+        
+        // Open a new modal with the PDF viewer
+        setTimeout(() => {
+          openMobileModal(pdfViewerContent.outerHTML);
+        }, 300);
+      });
+    });
+  }
   
   // Show modal
   mobileModal.classList.add('active');
@@ -546,6 +570,206 @@ function openMobileModal(content) {
       closeMobileModal();
     }
   });
+}
+
+// Function to create a PDF viewer in mobile modal
+function createMobilePDFViewer(pdfPath, title, options = {}) {
+  console.log('Creating mobile PDF viewer for:', pdfPath);
+  
+  // Container for everything
+  const container = document.createElement('div');
+  container.style.width = '100%';
+  container.style.height = '100%';
+  container.style.display = 'flex';
+  container.style.flexDirection = 'column';
+  
+  // Header with title and buttons
+  const header = document.createElement('div');
+  header.style.display = 'flex';
+  header.style.justifyContent = 'space-between';
+  header.style.alignItems = 'center';
+  header.style.marginBottom = '15px';
+  
+  const titleEl = document.createElement('h3');
+  titleEl.textContent = title;
+  titleEl.style.margin = '0';
+  
+  const buttonsContainer = document.createElement('div');
+  buttonsContainer.style.display = 'flex';
+  buttonsContainer.style.gap = '10px';
+  
+  // Back button - conditionally added
+  if (options.showBackToCerts) {
+    const backBtn = document.createElement('button');
+    backBtn.className = 'resume-btn outline cert-back-btn'; // Added class for identification
+    backBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/></svg> Back';
+    // Use direct event handler instead of inline function
+    backBtn.addEventListener('click', function(e) {
+      console.log('Back button clicked for certs view');
+      e.preventDefault(); // Prevent any default behavior
+      e.stopPropagation(); // Stop event from bubbling
+      closeMobileModal();
+      setTimeout(() => { 
+        console.log('Showing certs tab');
+        showTab('certs'); 
+      }, 300);
+    });
+    buttonsContainer.appendChild(backBtn);
+  } 
+  else if (options.showBackToResume) {
+    const backBtn = document.createElement('button');
+    backBtn.className = 'resume-btn outline resume-back-btn'; // Added class for identification
+    backBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/></svg> Back';
+    // Use direct event handler instead of inline function
+    backBtn.addEventListener('click', function(e) {
+      console.log('Back button clicked for resume view');
+      e.preventDefault(); // Prevent any default behavior
+      e.stopPropagation(); // Stop event from bubbling
+      closeMobileModal();
+      setTimeout(() => { 
+        console.log('Showing resume tab');
+        showTab('resume'); 
+      }, 300);
+    });
+    buttonsContainer.appendChild(backBtn);
+  }
+  
+  // View in new tab button
+  const viewBtn = document.createElement('button');
+  viewBtn.className = 'resume-btn outline';
+  viewBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg> View';
+  viewBtn.addEventListener('click', function(e) { 
+    console.log('View button clicked for:', pdfPath);
+    e.preventDefault(); // Prevent any default behavior
+    e.stopPropagation(); // Stop event from bubbling
+    window.open(pdfPath, '_blank');
+  });
+  buttonsContainer.appendChild(viewBtn);
+  
+  // Download button - only for resume
+  if (options.showBackToResume) {
+    const downloadBtn = document.createElement('button');
+    downloadBtn.className = 'resume-btn';
+    downloadBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg> Download';
+    downloadBtn.addEventListener('click', function(e) {
+      console.log('Download button clicked for resume');
+      e.preventDefault(); // Prevent any default behavior
+      e.stopPropagation(); // Stop event from bubbling
+      downloadResume();
+    });
+    buttonsContainer.appendChild(downloadBtn);
+  }
+  
+  header.appendChild(titleEl);
+  header.appendChild(buttonsContainer);
+  container.appendChild(header);
+  
+  // PDF container
+  const pdfContainer = document.createElement('div');
+  pdfContainer.style.position = 'relative';
+  pdfContainer.style.flex = '1';
+  pdfContainer.style.border = '2px solid var(--accent)';
+  pdfContainer.style.borderRadius = '8px';
+  pdfContainer.style.overflow = 'hidden';
+  
+  // Check if file exists first
+  checkFileExists(pdfPath, function(exists) {
+    if (!exists) {
+      const loading = document.createElement('div');
+      loading.className = 'resume-loading';
+      loading.innerHTML = `Error: File not found. Path: ${pdfPath}`;
+      loading.style.position = 'absolute';
+      loading.style.top = '50%';
+      loading.style.left = '50%';
+      loading.style.transform = 'translate(-50%, -50%)';
+      loading.style.zIndex = '5';
+      loading.style.background = 'rgba(0,0,0,0.7)';
+      loading.style.padding = '15px 25px';
+      loading.style.borderRadius = '8px';
+      pdfContainer.appendChild(loading);
+      return;
+    }
+  });
+  
+  // Loading indicator
+  const loading = document.createElement('div');
+  loading.className = 'resume-loading';
+  loading.id = `mobile-loading-${Date.now()}`; // Unique ID for tracking
+  loading.innerHTML = `Loading ${options.loadingText || 'PDF'}... <div class="spinner"></div>`;
+  loading.style.position = 'absolute';
+  loading.style.top = '50%';
+  loading.style.left = '50%';
+  loading.style.transform = 'translate(-50%, -50%)';
+  loading.style.zIndex = '5';
+  loading.style.background = 'rgba(0,0,0,0.7)';
+  loading.style.padding = '15px 25px';
+  loading.style.borderRadius = '8px';
+  
+  // PDF object
+  const pdfObj = document.createElement('object');
+  const pdfObjId = `mobile-pdf-obj-${Date.now()}`; // Unique ID for tracking
+  pdfObj.id = pdfObjId;
+  pdfObj.data = pdfPath;
+  pdfObj.type = 'application/pdf';
+  pdfObj.width = '100%';
+  pdfObj.height = '100%';
+  pdfObj.style.position = 'absolute';
+  pdfObj.style.top = '0';
+  pdfObj.style.left = '0';
+  
+  // Set a timeout to check if the PDF has loaded
+  setTimeout(function() {
+    // Find the loading and PDF objects in the document
+    const loadingElem = document.getElementById(loading.id);
+    console.log(`Checking mobile PDF load status after 3 seconds for ${pdfPath}`);
+    if (loadingElem && loadingElem.style.display !== 'none') {
+      console.warn(`Mobile PDF may not have loaded properly: ${pdfPath}`);
+      // Try to manually check if the object has content
+      const pdfObjElem = document.getElementById(pdfObjId);
+      if (pdfObjElem) {
+        try {
+          // Check if PDF object has content
+          if (pdfObjElem.contentDocument && pdfObjElem.contentDocument.body) {
+            if (pdfObjElem.contentDocument.body.childElementCount > 0) {
+              console.log('Mobile PDF appears to have loaded but onload did not fire');
+              loadingElem.style.display = 'none';
+            } else {
+              loadingElem.innerHTML = `Error loading PDF. Please check the path: ${pdfPath}`;
+            }
+          }
+        } catch (e) {
+          console.error('Error checking mobile PDF object:', e);
+        }
+      }
+    }
+  }, 3000);
+  
+  // Add event listeners for PDF loading
+  pdfObj.onload = function() {
+    console.log('Mobile PDF loaded successfully:', pdfPath);
+    loading.style.display = 'none';
+  };
+  
+  pdfObj.onerror = function() {
+    console.error('Error loading mobile PDF:', pdfPath);
+    loading.innerHTML = `Error loading PDF. Please try again later.`;
+  };
+  
+  // Fallback for browsers that don't support embedded PDFs
+  pdfObj.innerHTML = `
+    <div style="padding: 20px; text-align: center;">
+      <p>Your browser doesn't support embedded PDFs.</p>
+      <a href="${pdfPath}" target="_blank" class="resume-btn outline" style="display: inline-block; margin-top: 15px;">
+        Open PDF
+      </a>
+    </div>
+  `;
+  
+  pdfContainer.appendChild(loading);
+  pdfContainer.appendChild(pdfObj);
+  container.appendChild(pdfContainer);
+  
+  return container;
 }
 
 function closeMobileModal() {
@@ -570,6 +794,209 @@ function closeMobileModal() {
     
     document.body.style.overflow = ''; // Restore scrolling
   }
+}
+
+// Add a function to check file existence
+function checkFileExists(url, callback) {
+  const xhr = new XMLHttpRequest();
+  xhr.open('HEAD', url, true);
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {
+        console.log(`File exists: ${url}`);
+        callback(true);
+      } else {
+        console.error(`File does not exist: ${url}, status: ${xhr.status}`);
+        callback(false);
+      }
+    }
+  };
+  xhr.onerror = function() {
+    console.error(`Error checking file: ${url}`);
+    callback(false);
+  };
+  xhr.send();
+}
+
+// Modify the createPDFViewer function to add better error handling
+function createPDFViewer(pdfPath, title, options = {}) {
+  console.log('Creating PDF viewer for:', pdfPath, 'with title:', title);
+  
+  // Container for the PDF viewer
+  const viewerContainer = document.createElement('div');
+  viewerContainer.style.display = 'flex';
+  viewerContainer.style.flexDirection = 'column';
+  viewerContainer.style.width = '100%';
+  viewerContainer.style.minHeight = '500px';
+  
+  // Create header with title and buttons
+  const header = document.createElement('div');
+  header.style.display = 'flex';
+  header.style.justifyContent = 'space-between';
+  header.style.alignItems = 'center';
+  header.style.marginBottom = '20px';
+  
+  // Create title element
+  const titleElement = document.createElement('h3');
+  titleElement.textContent = title;
+  titleElement.style.margin = '0';
+  
+  // Create buttons container
+  const buttonContainer = document.createElement('div');
+  buttonContainer.style.display = 'flex';
+  buttonContainer.style.gap = '10px';
+  
+  // Add custom buttons from options
+  if (options.buttons && Array.isArray(options.buttons)) {
+    options.buttons.forEach(button => {
+      buttonContainer.appendChild(button);
+    });
+  }
+  
+  // Assemble header
+  header.appendChild(titleElement);
+  header.appendChild(buttonContainer);
+  viewerContainer.appendChild(header);
+  
+  // Create PDF container
+  const pdfContainer = document.createElement('div');
+  pdfContainer.style.flex = '1';
+  pdfContainer.style.position = 'relative';
+  pdfContainer.style.border = '2px solid var(--accent)';
+  pdfContainer.style.borderRadius = '8px';
+  pdfContainer.style.overflow = 'hidden';
+  pdfContainer.style.minHeight = '500px';
+  
+  // Add loading indicator
+  const loading = document.createElement('div');
+  loading.className = 'pdf-loading';
+  loading.id = `loading-${Date.now()}`; // Unique ID for reference
+  loading.innerHTML = `Loading ${options.loadingText || 'PDF'}... <div class="spinner"></div>`;
+  loading.style.position = 'absolute';
+  loading.style.top = '50%';
+  loading.style.left = '50%';
+  loading.style.transform = 'translate(-50%, -50%)';
+  loading.style.zIndex = '5';
+  loading.style.background = 'rgba(0,0,0,0.7)';
+  loading.style.padding = '15px 25px';
+  loading.style.borderRadius = '8px';
+  
+  // First check if file exists
+  checkFileExists(pdfPath, function(exists) {
+    if (!exists) {
+      loading.innerHTML = `Error: File not found. Path: ${pdfPath}`;
+      return;
+    }
+  });
+  
+  // Create PDF object element
+  const pdfObj = document.createElement('object');
+  const pdfObjId = `pdf-obj-${Date.now()}`; // Unique ID for reference
+  pdfObj.id = pdfObjId;
+  pdfObj.data = pdfPath;
+  pdfObj.type = 'application/pdf';
+  pdfObj.width = '100%';
+  pdfObj.height = '100%';
+  pdfObj.style.position = 'absolute';
+  pdfObj.style.top = '0';
+  pdfObj.style.left = '0';
+  
+  // Log when PDF tries to load and if there are errors
+  console.log('Setting up PDF object with path:', pdfPath);
+  
+  // Set a timeout to check if the PDF has loaded
+  setTimeout(function() {
+    const loadingElem = document.getElementById(loading.id);
+    console.log(`Checking PDF load status after 3 seconds for ${pdfPath}`);
+    if (loadingElem && loadingElem.style.display !== 'none') {
+      console.warn(`PDF may not have loaded properly: ${pdfPath}`);
+      // Try to manually check if the object has content
+      const pdfObjElem = document.getElementById(pdfObjId);
+      if (pdfObjElem) {
+        try {
+          // Check if PDF object has content
+          if (pdfObjElem.contentDocument && pdfObjElem.contentDocument.body) {
+            if (pdfObjElem.contentDocument.body.childElementCount > 0) {
+              console.log('PDF appears to have loaded but onload did not fire');
+              loadingElem.style.display = 'none';
+            } else {
+              loadingElem.innerHTML = `Error loading PDF. Please check the path: ${pdfPath}`;
+            }
+          }
+        } catch (e) {
+          console.error('Error checking PDF object:', e);
+        }
+      }
+    }
+  }, 3000);
+  
+  // Hide loading when PDF loads
+  pdfObj.onload = function() {
+    console.log('PDF loaded successfully:', pdfPath);
+    loading.style.display = 'none';
+  };
+  
+  // Add error handling
+  pdfObj.onerror = function() {
+    console.error('Error loading PDF:', pdfPath);
+    loading.innerHTML = `Error loading PDF. Please try again later.`;
+  };
+  
+  // Fallback content for browsers that don't support embedded PDFs
+  pdfObj.innerHTML = `
+    <div style="padding: 20px; text-align: center;">
+      <p>Your browser doesn't support embedded PDFs.</p>
+      <a href="${pdfPath}" target="_blank" class="resume-btn outline" style="display: inline-block; margin-top: 15px;">
+        Open PDF
+      </a>
+    </div>
+  `;
+  
+  // Assemble PDF container
+  pdfContainer.appendChild(loading);
+  pdfContainer.appendChild(pdfObj);
+  viewerContainer.appendChild(pdfContainer);
+  
+  return viewerContainer;
+}
+
+// Function to show certificate in-app
+function showCertificate(pdfPath, title) {
+  // Get container references - these need to be looked up on each call
+  const certViewContainer = document.getElementById('cert-view-container');
+  const certListContainer = document.getElementById('cert-list-container');
+  
+  // Hide cert list and show cert view
+  certListContainer.style.display = 'none';
+  certViewContainer.style.display = 'flex';
+  
+  // Clear previous content
+  certViewContainer.innerHTML = '';
+  
+  // Create back button
+  const backBtn = document.createElement('button');
+  backBtn.className = 'resume-btn outline';
+  backBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/></svg> Back to List';
+  backBtn.onclick = function() {
+    certViewContainer.style.display = 'none';
+    certListContainer.style.display = 'block';
+  };
+  
+  // Create view button
+  const viewBtn = document.createElement('button');
+  viewBtn.className = 'resume-btn outline';
+  viewBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg> View in New Tab';
+  viewBtn.onclick = function() {
+    window.open(pdfPath, '_blank');
+  };
+  
+  // Use the universal PDF viewer
+  const pdfViewer = createPDFViewer(pdfPath, title, {
+    buttons: [backBtn, viewBtn],
+    loadingText: 'certificate'
+  });
+  
+  certViewContainer.appendChild(pdfViewer);
 }
 
 // Separated content rendering logic from renderTab
@@ -605,19 +1032,51 @@ function renderContent(tab, container) {
         ul.appendChild(li);
       });
     } else {
+      // Create certificate view container (initially hidden)
+      const certViewContainer = document.createElement('div');
+      certViewContainer.id = 'cert-view-container';
+      certViewContainer.style.display = 'none';
+      certViewContainer.style.flexDirection = 'column';
+      certViewContainer.style.width = '100%';
+      certViewContainer.style.minHeight = '500px';
+      
+      // Create list container (initially visible)
+      const certListContainer = document.createElement('div');
+      certListContainer.id = 'cert-list-container';
+      
       // Certificates with PDF links if available
       data[tab].forEach(cert => {
         const li = document.createElement('li');
         li.className = 'item';
-        li.style.marginBottom = "10px";
+        li.style.marginBottom = "15px";
         
         if (cert.pdf) {
+          // Create a button-like link
           const link = document.createElement('a');
-          link.href = cert.pdf;
-          link.target = "_blank";
-          link.rel = "noopener";
+          link.href = '#';
+          link.className = 'cert-link';
+          link.setAttribute('data-pdf', cert.pdf);
           link.style.color = "var(--accent)";
+          link.style.textDecoration = "none";
+          link.style.display = "inline-flex";
+          link.style.alignItems = "center";
           link.textContent = cert.title;
+          
+          // Add a certificate icon
+          const icon = document.createElement('span');
+          icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" style="margin-right: 8px" viewBox="0 0 16 16">
+            <path d="M5.338 1.59a61.44 61.44 0 0 0-2.837.856.481.481 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.725 10.725 0 0 0 2.287 2.233c.346.244.652.42.893.533.12.057.218.095.293.118a.55.55 0 0 0 .101.025.615.615 0 0 0 .1-.025c.076-.023.174-.061.294-.118.24-.113.547-.29.893-.533a10.726 10.726 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.775 11.775 0 0 1-2.517 2.453 7.159 7.159 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7.158 7.158 0 0 1-1.048-.625 11.777 11.777 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 62.456 62.456 0 0 1 5.072.56z"/>
+            <path d="M8 4.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V9a.5.5 0 0 1-1 0V7.5H6a.5.5 0 0 1 0-1h1.5V5a.5.5 0 0 1 .5-.5z"/>
+          </svg>`;
+          
+          link.prepend(icon);
+          
+          // Handle click event to show the certificate in-app
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            showCertificate(cert.pdf, cert.title);
+          });
+          
           li.appendChild(link);
         } else {
           li.textContent = cert.title;
@@ -625,9 +1084,16 @@ function renderContent(tab, container) {
         
         ul.appendChild(li);
       });
+      
+      certListContainer.appendChild(ul);
+      listContainer.appendChild(certListContainer);
+      listContainer.appendChild(certViewContainer);
     }
     
-    listContainer.appendChild(ul);
+    if (tab !== 'certs') {
+      listContainer.appendChild(ul);
+    }
+    
     contentInner.appendChild(listContainer);
   } else if (tab === 'portfolio') {
     // Instead of a grid, use a more flexible layout for portfolio items
@@ -764,74 +1230,23 @@ function renderContent(tab, container) {
     });
     contentInner.appendChild(contactList);
   } else if (tab === 'resume') {
-    const resumeContainer = document.createElement('div');
-    resumeContainer.className = 'resume-container';
-    
-    // Resume preview card
-    const resumePreview = document.createElement('div');
-    resumePreview.className = 'resume-preview';
-    
-    // Resume thumbnail visualization
-    const thumbnail = document.createElement('div');
-    thumbnail.className = 'resume-thumbnail';
-    // Create line elements to suggest text content
-    for (let i = 0; i < 6; i++) {
-      const line = document.createElement('div');
-      line.className = 'line';
-      thumbnail.appendChild(line);
-    }
-    
-    resumePreview.innerHTML = `
-      <h3>Anthony Miller - Resume</h3>
-      <p>Last updated: February 3, 2025</p>
-    `;
-    resumePreview.prepend(thumbnail);
-    
-    // Resume action buttons
-    const actionsDiv = document.createElement('div');
-    actionsDiv.className = 'resume-actions';
-    
-    // View button with direct event handler
+    // Create view button
     const viewBtn = document.createElement('button');
     viewBtn.className = 'resume-btn outline';
-    viewBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg> View Resume';
+    viewBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg> View in New Tab';
+    viewBtn.onclick = function() {
+      window.open(resumeFile, '_blank');
+    };
     
-    // Use an event listener instead of onclick
-    viewBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation(); // Prevent event bubbling
-      
-      // Close mobile modal if open
-      closeMobileModal();
-      
-      // Open resume in new tab
-      openResumeModal();
+    // Use the universal PDF viewer with correct resumeFile path
+    const pdfViewer = createPDFViewer(resumeFile, 'Anthony Miller - Resume', {
+      buttons: [viewBtn],
+      loadingText: 'resume'
     });
     
-    // Download button with direct event handler
-    const downloadBtn = document.createElement('button');
-    downloadBtn.className = 'resume-btn';
-    downloadBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg> Download Resume';
+    contentInner.appendChild(pdfViewer);
     
-    // Use an event listener instead of onclick
-    downloadBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation(); // Prevent event bubbling
-      
-      // Close mobile modal
-      closeMobileModal();
-      
-      // Download resume
-      downloadResume();
-    });
-    
-    actionsDiv.appendChild(viewBtn);
-    actionsDiv.appendChild(downloadBtn);
-    
-    resumePreview.appendChild(actionsDiv);
-    resumeContainer.appendChild(resumePreview);
-    
-    contentInner.appendChild(resumeContainer);
+    console.log('PDF path being loaded:', resumeFile);
   }
 }
 
@@ -842,6 +1257,15 @@ window.closeMobileModal = closeMobileModal;
 document.addEventListener('DOMContentLoaded', function() {
   // Check if we're on mobile
   const isMobile = window.innerWidth <= 768;
+  
+  // Check that we're using the correct resume path
+  console.log('Using resume file path:', resumeFile);
+  if (data.resume) {
+    console.warn('data.resume is defined but not being used. Value:', data.resume);
+    // Update data.resume to use the correct path
+    data.resume = resumeFile;
+    console.log('Updated data.resume to:', data.resume);
+  }
   
   // Initialize first tab only on desktop
   if (!isMobile) {
@@ -871,4 +1295,13 @@ document.addEventListener('DOMContentLoaded', function() {
   handleMobileView();
   window.addEventListener('resize', handleMobileView);
   window.addEventListener('orientationchange', handleMobileView);
+  
+  // Check if resume file exists
+  checkFileExists(resumeFile, function(exists) {
+    if (exists) {
+      console.log('Resume file exists and is accessible');
+    } else {
+      console.error('Resume file does not exist or is not accessible. Please check the path:', resumeFile);
+    }
+  });
 }); 

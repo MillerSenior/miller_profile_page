@@ -415,34 +415,38 @@ body {
   box-shadow: 0 10px 25px rgba(0, 242, 254, 0.4);
 }
 
+/* Resume buttons styling */
 .resume-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  padding: 8px 15px;
   background: var(--accent);
   color: black;
   border: none;
-  border-radius: 6px;
-  padding: 12px 20px;
-  font-weight: bold;
+  border-radius: 5px;
   cursor: pointer;
-  transition: all 0.3s;
-  min-width: 160px;
-  justify-content: center;
-  z-index: 1250;
-  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.resume-btn svg {
+  flex-shrink: 0;
 }
 
 .resume-btn.outline {
   background: transparent;
-  color: var(--accent);
   border: 2px solid var(--accent);
+  color: var(--accent);
 }
 
-.resume-btn:hover, 
-.resume-actions button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0, 242, 254, 0.4);
+.resume-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 242, 254, 0.3);
+}
+
+.resume-btn.outline:hover {
+  background: rgba(0, 242, 254, 0.1);
 }
 
 /* Portfolio card styles */
@@ -896,6 +900,65 @@ body.light-mode #topnav {
   justify-content: center;
 }
 
+/* PDF spinner loading animation */
+.spinner {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(0, 242, 254, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--accent);
+  animation: spin 1s ease-in-out infinite;
+  margin-top: 10px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Resume iframe container */
+.resume-iframe-container {
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 2px solid var(--accent);
+  background-color: rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.resume-iframe {
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+  border: none;
+  flex: 1;
+}
+
+/* Resume loading indicator */
+.resume-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 15px 25px;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: var(--accent);
+  z-index: 10;
+  text-align: center;
+}
+
+/* Card styling for resume */
+.resume-container .card {
+  background: rgba(255, 255, 255, 0.05) !important;
+  height: auto !important;
+  min-height: 600px;
+}
+
 /* Nav icon styling */
 .nav-icon {
   display: inline-block;
@@ -981,4 +1044,45 @@ body.light-mode #topnav {
 
 .navbar-dark .navbar-toggler-icon {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(0, 242, 254, 0.75)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* Certificate list styling */
+.cert-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  text-decoration: none !important;
+}
+
+.cert-link:hover {
+  background: rgba(0, 242, 254, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 242, 254, 0.2);
+}
+
+.cert-link svg {
+  margin-right: 8px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* Certificate viewer container */
+#cert-view-container {
+  flex-direction: column;
+  width: 100%;
+  min-height: 550px;
+  margin-top: 0;
+}
+
+/* PDF object container */
+.pdf-container {
+  flex: 1;
+  position: relative;
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.2);
+  min-height: 500px;
 } 
