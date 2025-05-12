@@ -479,6 +479,17 @@ function openMobileModal(content) {
   // Clone content to modal
   mobileContent.innerHTML = content;
   
+  // Make sure we have a visible close button
+  // Check if a close button already exists, if not add one
+  const existingCloseBtn = mobileModal.querySelector('.mobile-modal-close');
+  if (!existingCloseBtn) {
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'mobile-modal-close';
+    closeBtn.innerHTML = '<span style="font-size: 24px; line-height: 1;">✕</span>';
+    closeBtn.onclick = closeMobileModal;
+    mobileModal.querySelector('.mobile-modal-content').prepend(closeBtn);
+  }
+  
   // Set proper height for modal content
   const windowHeight = window.innerHeight;
   const navHeight = document.querySelector('#topnav').offsetHeight;
@@ -527,12 +538,27 @@ function openMobileModal(content) {
   // Show modal
   mobileModal.classList.add('active');
   document.body.style.overflow = 'hidden'; // Prevent scrolling
+  
+  // Add click outside to close functionality
+  mobileModal.addEventListener('click', function(e) {
+    // If the click is directly on the modal background (not on its children), close the modal
+    if (e.target === mobileModal) {
+      closeMobileModal();
+    }
+  });
 }
 
 function closeMobileModal() {
   const mobileModal = document.getElementById('mobileContentModal');
   if (mobileModal) {
     mobileModal.classList.remove('active');
+    
+    // Remove the click outside event listener to prevent memory leaks
+    mobileModal.removeEventListener('click', function(e) {
+      if (e.target === mobileModal) {
+        closeMobileModal();
+      }
+    });
     
     // Clear the content after animation completes to prevent memory leaks
     setTimeout(() => {
