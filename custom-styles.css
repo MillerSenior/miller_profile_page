@@ -469,6 +469,23 @@ body {
   border-color: var(--accent);
 }
 
+/* Add flashing animation for Coming Soon button */
+@keyframes flash {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.coming-soon {
+  cursor: default !important;
+  animation: flash 2s infinite !important;
+}
+
+.coming-soon:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
 .portfolio-card-content {
   flex: 1;
   padding: 15px;

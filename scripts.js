@@ -205,34 +205,15 @@ const data = {
       url: "https://relieftracker.onrender.com/"
     },
     {
-      title: "Education Platform for Corrections",
-      desc: "Developed a platform that expands educational access for incarcerated individuals, addressing the 60% illiteracy rate in prisons.",
-      url: "https://unlockedlabs.org"
+      title: "DarroTech LLC",
+      desc: "A modern technology consulting firm's website showcasing software development, AI solutions, and digital transformation services. Built with React and styled-components for a sleek, professional presentation.",
+      url: "https://darrotech.com"
     },
     {
-      title: "Rehabilitation Program Analytics",
-      desc: "Built data visualization dashboards to analyze and improve educational and rehabilitation programs within the justice system.",
-      url: "https://data-solutions.example.com"
-    },
-    {
-      title: "Re-entry Support System",
-      desc: "Designed open-source software to help states support re-entry with student achievement records and program tracking.",
-      url: "https://reentry-support.example.com"
-    },
-    {
-      title: "Parole Tracking Application",
-      desc: "Enhanced parole and release tracking systems, ensuring fair implementation of earned credit policies.",
-      url: "https://parole-tracker.example.com"
-    },
-    {
-      title: "Education Outcomes Dashboard",
-      desc: "Created interactive visualization tools for real-time analysis of education outcomes for justice reform initiatives.",
-      url: "https://edu-outcomes.example.com"
-    },
-    {
-      title: "Accessible Learning Platform",
-      desc: "Developed intuitive, accessible web applications for incarcerated students and program administrators.",
-      url: "https://accessible-learning.example.com"
+      title: "The Butterfly Club (Coming Soon)",
+      desc: "A complete rebuild of shopthebutterflyclub.com using Spring Boot for a modern e-commerce experience. Features secure payment processing, inventory management, and a responsive design.",
+      url: "#",
+      isComingSoon: true
     }
   ],
   contact: [
@@ -259,13 +240,13 @@ const data = {
       value: "St. Louis, MO",
       url: "",
       icon: "📍"
-    },
-    {
-      title: "Phone",
-      value: "(314) 885-8610",
-      url: "tel:+13148858610",
-      icon: "📱"
     }
+    // {
+    //   title: "Phone",
+    //   value: "(314) 885-8610",
+    //   url: "tel:+13148858610",
+    //   icon: "📱"
+    // }
   ],
   resume: "resume.pdf" // Path to the resume file
 };
@@ -1332,9 +1313,9 @@ function renderContent(tab, container) {
       
       const linkElement = document.createElement('a');
       linkElement.href = project.url;
-      linkElement.target = "_blank";
-      linkElement.className = "button-style";
-      linkElement.textContent = "Visit Project";
+      linkElement.target = project.isComingSoon ? "_self" : "_blank";
+      linkElement.className = project.isComingSoon ? "button-style coming-soon" : "button-style";
+      linkElement.textContent = project.isComingSoon ? "Coming Soon" : "Visit Project";
       linkElement.style.display = "inline-block";
       linkElement.style.background = "var(--accent)";
       linkElement.style.color = "black";
@@ -1343,6 +1324,10 @@ function renderContent(tab, container) {
       linkElement.style.textDecoration = "none";
       linkElement.style.fontWeight = "bold";
       linkElement.style.transition = "all 0.3s";
+      
+      if (project.isComingSoon) {
+        linkElement.onclick = (e) => e.preventDefault();
+      }
       
       actionDiv.appendChild(linkElement);
       
